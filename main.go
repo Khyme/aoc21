@@ -55,8 +55,7 @@ func depthIncrease(records [][]string) int64 {
 
 // generalization with sliding windows
 func slidingDepthIncrease(records [][]string, windowSize int) int64 {
-	var i int64
-	var previousRec int64
+	var i, prevDepth int64
 	var depthSet []int64
 	for index, record := range records {
 		depth, err := strconv.ParseInt(record[0], 10, 64)
@@ -64,18 +63,14 @@ func slidingDepthIncrease(records [][]string, windowSize int) int64 {
 			log.Fatal("depth is not an int")
 		}
 		if index > windowSize-1 {
+			prevDepth = depthSet[0]
 			depthSet = append(depthSet[1:], depth)
 		} else {
 			depthSet = append(depthSet, depth)
 		}
-		var setTot int64
-		for _, item := range depthSet {
-			setTot += item
-		}
-		if index > windowSize-1 && setTot > previousRec {
+		if index > windowSize-1 && depth > prevDepth {
 			i++
 		}
-		previousRec = setTot
 	}
 	return i
 }
