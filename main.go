@@ -6,12 +6,16 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
 	rec := readCsvFile(1)
 	fmt.Printf("DepthIncrease with 1 window: %v\n", slidingDepthIncrease(rec, 1))
 	fmt.Printf("DepthIncrease with 3 window: %v\n", slidingDepthIncrease(rec, 3))
+	rec = readCsvFile(2)
+	fmt.Printf("Move submarine: %v\n", moveSubmarine(rec))
+	fmt.Printf("Move submarine V2: %v\n", moveSubmarineV2(rec))
 }
 
 func readCsvFile(day int64) [][]string {
@@ -74,4 +78,45 @@ func slidingDepthIncrease(records [][]string, windowSize int) int64 {
 		previousRec = setTot
 	}
 	return i
+}
+
+func moveSubmarine(records [][]string) int64 {
+	var depth, horizontal int64
+	for _, record := range records {
+		instructions := strings.Fields(record[0])
+		value, err := strconv.ParseInt(instructions[1], 10, 64)
+		if err != nil {
+			log.Fatal("value is not an int")
+		}
+		switch instructions[0] {
+		case "forward":
+			horizontal += value
+		case "down":
+			depth += value
+		case "up":
+			depth -= value
+		}
+	}
+	return depth * horizontal
+}
+
+func moveSubmarineV2(records [][]string) int64 {
+	var depth, horizontal, aim int64
+	for _, record := range records {
+		instructions := strings.Fields(record[0])
+		value, err := strconv.ParseInt(instructions[1], 10, 64)
+		if err != nil {
+			log.Fatal("value is not an int")
+		}
+		switch instructions[0] {
+		case "forward":
+			horizontal += value
+			depth += aim * value
+		case "down":
+			aim += value
+		case "up":
+			aim -= value
+		}
+	}
+	return depth * horizontal
 }
