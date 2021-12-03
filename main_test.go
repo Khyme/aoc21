@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestDay1(t *testing.T) {
 	// Examples
@@ -20,7 +22,7 @@ func TestDay1(t *testing.T) {
 	}
 	day1window3 := slidingDepthIncrease(rec, 3)
 	if day1window3 != 1805 {
-		t.Errorf("Window1 got %d; want 1759", day1window3)
+		t.Errorf("Window1 got %d; want 1805", day1window3)
 	}
 }
 
@@ -43,5 +45,38 @@ func TestDay2(t *testing.T) {
 	day2v2 := moveSubmarineV2(rec)
 	if day2v2 != 1813664422 {
 		t.Errorf("Window1 got %d; want 1813664422", day2v2)
+	}
+}
+
+func TestDay3(t *testing.T) {
+	// Example
+	ex := [][]string{
+		{"00100"},
+		{"11110"},
+		{"10110"},
+		{"10111"},
+		{"10101"},
+		{"01111"},
+		{"00111"},
+		{"11100"},
+		{"10000"},
+		{"11001"},
+		{"00010"},
+		{"01010"},
+	}
+	if diagnostic(ex) != 198 {
+		t.Errorf("Example got %d; want 198", diagnostic(ex))
+	}
+	if lifeSupportRecursion(ex) != 230 {
+		t.Errorf("Example got %d; want 230", lifeSupportRecursion(ex))
+	}
+
+	// Input data
+	rec := readCsvFile(3)
+	if diagnostic(rec) != 2743844 {
+		t.Errorf("Data got %d; want 2743844", diagnostic(rec))
+	}
+	if lifeSupportRecursion(rec) != 6677951 {
+		t.Errorf("Data got %d; want 6677951", lifeSupportRecursion(rec))
 	}
 }
