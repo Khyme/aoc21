@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"log"
@@ -186,4 +187,154 @@ func recursive(records [][]string, processPos int, common string, defaultVal str
 		}
 	}
 	return recursive(records, processPos+1, common, defaultVal)
+}
+
+type Bingo struct {
+	cases map[int]Case
+}
+
+type Case struct {
+	Value int
+	x     int
+	y     int
+}
+
+func bingo(filename string) (int, int) {
+	file, err := os.Open(filename)
+
+	if err != nil {
+		log.Fatalf("failed opening file: %s", err)
+	}
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	var draw []int
+	var tables []Bingo
+
+	lineCount := 0
+	tableCount := 0
+	rowCount := 0
+	for scanner.Scan() {
+		if lineCount == 0 {
+			strs := strings.Split(scanner.Text(), ",")
+			draw = make([]int, len(strs))
+			for i := range draw {
+				draw[i], _ = strconv.Atoi(strs[i])
+			}
+		} else {
+			if scanner.Text() == "" {
+				tableCount++
+				tables = append(tables, Bingo{cases: make(map[int]Case)})
+				rowCount = 0
+			} else {
+				strs := lineToInts(scanner.Text())
+				for i := range strs {
+					val := strs[i]
+					tables[tableCount-1].cases[val] = Case{Value: val, x: i, y: rowCount}
+				}
+				rowCount++
+			}
+		}
+		lineCount++
+	}
+	file.Close()
+
+	winningDraw, winningBoard, losingDraw, losingBoard := findWinnerAndLoser(draw, tables)
+	return draw[winningDraw] * score(tables[winningBoard], winningDraw, draw),
+		draw[losingDraw] * score(tables[losingBoard], losingDraw, draw)
+}
+
+func lineToInts(line string) []int {
+	strs := strings.Split(line, " ")
+	var integerz []int
+	for i := range strs {
+		if strs[i] != "" {
+			val, _ := strconv.Atoi(strs[i])
+			integerz = append(integerz, val)
+		}
+	}
+	return integerz
+}
+
+func score(board Bingo, winningDraw int, draw []int) int {
+	for j := 0; j <= winningDraw; j++ {
+		delete(board.cases, draw[j])
+	}
+	total := 0
+	for k := range board.cases {
+		total = total + k
+	}
+	return total
+}
+
+func findWinnerAndLoser(draw []int, tables []Bingo) (int, int, int, int) {
+	var winnerDraw, winnerBoard, loserDraw, loserBoard int
+	gotWinner := false
+	gotLoser := false
+
+	winners := make(map[string]bool)
+	for k := 0; k < len(tables); k++ {
+		winners[strconv.Itoa(k)] = true
+	}
+
+	results := make(map[string]int)
+	for i := 0; i < len(draw); i++ {
+		drawed := draw[i]
+		for j, t := range tables {
+			if val, ok := t.cases[drawed]; ok {
+				xindex := fmt.Sprintf("%dx%d", j, val.x)
+				if v, ok := results[xindex]; ok {
+					if v == 4 {
+						x := strings.Split(xindex, "x")[0]
+						if !gotWinner {
+							winnerDraw = i
+							winningBoardInt, _ := strconv.Atoi(x)
+							winnerBoard = winningBoardInt
+						}
+						gotWinner = true
+						delete(winners, x)
+						if len(winners) == 0 {
+							loserBoardInt, _ := strconv.Atoi(x)
+							loserBoard = loserBoardInt
+							loserDraw = i
+							gotLoser = true
+							break
+						}
+					}
+					results[xindex] = v + 1
+				} else {
+					results[xindex] = 1
+				}
+				yindex := fmt.Sprintf("%dy%d", j, val.y)
+
+				if v, ok := results[yindex]; ok {
+					if v == 4 {
+						y := strings.Split(yindex, "y")[0]
+
+						if !gotWinner {
+							winnerDraw = i
+							winningBoardInt, _ := strconv.Atoi(y)
+							winnerBoard = winningBoardInt
+						}
+						gotWinner = true
+						delete(winners, y)
+						if len(winners) == 0 {
+							loserBoardInt, _ := strconv.Atoi(y)
+							loserBoard = loserBoardInt
+							loserDraw = i
+							gotLoser = true
+							break
+						}
+					}
+					results[yindex] = v + 1
+				} else {
+					results[yindex] = 1
+				}
+			}
+		}
+		if gotWinner && gotLoser {
+			break
+		}
+	}
+	return winnerDraw, winnerBoard, loserDraw, loserBoard
 }

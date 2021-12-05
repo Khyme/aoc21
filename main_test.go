@@ -80,3 +80,27 @@ func TestDay3(t *testing.T) {
 		t.Errorf("Data got %d; want 6677951", lifeSupportRecursion(rec))
 	}
 }
+
+func TestDay4(t *testing.T) {
+	// Input data
+	win, lose := bingo("./day4test.csv")
+	if win != 4512 {
+		t.Errorf("Example got %d; want 4512", win)
+	}
+	if lose != 1924 {
+		t.Errorf("Example got %d; want 1924", lose)
+	}
+	win, lose = bingo("./day4.csv")
+	if win != 71708 {
+		t.Errorf("Example got %d; want 71708", win)
+	}
+	if lose != 34726 {
+		t.Errorf("Example got %d; want 34726", lose)
+	}
+}
+
+func TestLineInt(t *testing.T) {
+	lineToInts("22 59  7 10  6")
+	lineToInts("73 96 47  0 10")
+	lineToInts("73 96 47 14 10")
+}
